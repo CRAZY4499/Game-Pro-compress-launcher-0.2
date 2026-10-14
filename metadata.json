@@ -1,0 +1,6 @@
+{
+  "name": "GameShrink Pro",
+  "description": "Extreme PC Game Storage Optimization, Diagnostic Auto-Fix & Self-Healing Engine with real multi-threaded streaming compression and integrity repair.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

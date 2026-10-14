@@ -1,0 +1,19 @@
+{
+  "id": "/",
+  "name": "GameShrink Pro",
+  "short_name": "GameShrink",
+  "description": "Extreme PC Game Storage Optimization, Diagnostic Auto-Fix & Self-Healing Engine.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#0284c7",
+  "background_color": "#090d16",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
