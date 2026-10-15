@@ -6,6 +6,7 @@ interface HeaderProps {
   setActiveTab: (tab: 'library' | 'diagnostics' | 'benchmarks' | 'snapshots' | 'settings') => void;
   pendingIssueCount: number;
   onImportFolder: () => void;
+  onSelectFiles: () => void;
   isImporting: boolean;
   onOpenDesktopGuide: () => void;
 }
@@ -15,6 +16,7 @@ export const Header: React.FC<HeaderProps> = ({
   setActiveTab,
   pendingIssueCount,
   onImportFolder,
+  onSelectFiles,
   isImporting,
   onOpenDesktopGuide
 }) => {
@@ -88,7 +90,7 @@ export const Header: React.FC<HeaderProps> = ({
       </nav>
 
       {/* Zone 3: 1 primary action */}
-      <div className="flex items-center gap-3 shrink-0">
+      <div className="flex items-center gap-2 shrink-0">
         <button
           onClick={onOpenDesktopGuide}
           className="px-3 py-2 text-xs font-medium text-slate-300 hover:text-white bg-slate-900 border border-slate-700/80 rounded-lg hover:bg-slate-800 transition-colors whitespace-nowrap shrink-0 flex items-center gap-1.5 cursor-pointer"
@@ -97,12 +99,20 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
 
         <button
+          onClick={onSelectFiles}
+          disabled={isImporting}
+          className="px-3 py-2 text-xs font-medium text-slate-200 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-colors whitespace-nowrap shrink-0 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+        >
+          <span>Select Game Files</span>
+        </button>
+
+        <button
           onClick={onImportFolder}
           disabled={isImporting}
-          className="px-4 py-2 text-xs font-semibold text-slate-100 bg-sky-600 hover:bg-sky-500 rounded-lg transition-colors whitespace-nowrap shrink-0 flex items-center gap-2 shadow-sm cursor-pointer disabled:opacity-50"
+          className="px-3.5 py-2 text-xs font-semibold text-white bg-sky-600 hover:bg-sky-500 rounded-lg transition-colors whitespace-nowrap shrink-0 flex items-center gap-1.5 shadow-sm cursor-pointer disabled:opacity-50"
         >
           <FolderOpen className="w-3.5 h-3.5" />
-          {isImporting ? 'Reading Directory...' : 'Import PC Game Folder'}
+          <span>{isImporting ? 'Reading...' : 'Import Game Folder'}</span>
         </button>
       </div>
     </header>

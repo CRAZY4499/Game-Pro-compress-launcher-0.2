@@ -49,7 +49,9 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'library' | 'diagnostics' | 'benchmarks' | 'snapshots' | 'settings'>('library');
   const [snapshots, setSnapshots] = useState<RollbackSnapshot[]>([]);
   const [isDesktopModalOpen, setIsDesktopModalOpen] = useState(false);
+  const [folderTipOpen, setFolderTipOpen] = useState(false);
   const folderInputRef = useRef<HTMLInputElement>(null);
+  const filesInputRef = useRef<HTMLInputElement>(null);
 
   // Performance Configuration
   const [config, setConfig] = useState<PerformanceConfig>({
@@ -288,29 +290,10 @@ export default function App() {
     }
   };
 
-  // Import Real Local PC Folder via File System Access API or HTML5 input fallback
-  const handleImportRealFolder = async () => {
-    try {
-      if ('showDirectoryPicker' in window) {
-        setIsImporting(true);
-        const dirHandle = await (window as any).showDirectoryPicker({
-          mode: 'read'
-        });
-        const customGame = await scanRealDirectoryHandle(dirHandle);
-        setGames(prev => [customGame, ...prev]);
-        setSelectedGameId(customGame.id);
-        setActiveTab('library');
-      } else {
-        folderInputRef.current?.click();
-      }
-    } catch (err: any) {
-      if (err.name !== 'AbortError') {
-        // Fallback to standard input
-        folderInputRef.current?.click();
-      }
-    } finally {
-      setIsImporting(false);
-    }
+  // Import Real Local PC Folder via standard HTML5 webkitdirectory (bypasses Chrome system folder block)
+  const handleImportRealFolder = () => {
+    // Directly trigger HTML5 folder picker which allows Steam/Program Files without Chrome security blocks
+    folderInputRef.current?.click();
   };
 
   const handleFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -337,6 +320,7 @@ export default function App() {
         setActiveTab={setActiveTab}
         pendingIssueCount={totalPendingIssues}
         onImportFolder={handleImportRealFolder}
+        onSelectFiles={() => filesInputRef.current?.click()}
         isImporting={isImporting}
         onOpenDesktopGuide={() => setIsDesktopModalOpen(true)}
       />
@@ -424,6 +408,12 @@ export default function App() {
                 setSelectedGameId(id);
                 setActiveTab('diagnostics');
               }}
+              onRemoveCustomGame={(id) => {
+                setGames(prev => prev.filter(g => g.id !== id));
+                if (selectedGameId === id) {
+                  setSelectedGameId(games.find(g => g.id !== id)?.id || 'cp2077');
+                }
+              }}
               optimizingGameId={optimizingGameId}
               optimizationProgress={optimizationProgress}
             />
@@ -510,7 +500,59 @@ export default function App() {
         onClose={() => setIsDesktopModalOpen(false)}
       />
 
-      {/* Hidden Folder Picker Input Fallback */}
+      {/* Folder Selection Guidance Modal (For Chrome System Files Security Warning) */}
+      {folderTipOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
+          <div className="bg-slate-900 border border-slate-800 rounded-xl max-w-lg w-full shadow-2xl p-6 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white">
+                  Game Folder Selection Guide
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Chrome blocks selecting the whole C:\ drive or Windows root
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Windows aur Chrome security policy ki wajah se poora <strong>C:\</strong> drive ya Windows system folder select nahi karne deta.
+            </p>
+
+            <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-2 text-xs">
+              <span className="font-semibold text-sky-400 block">Kripya kisi specific game ke folder par click karein:</span>
+              <ul className="space-y-1 text-slate-300 font-mono text-[11px] list-disc list-inside">
+                <li>Steam Games: <code className="text-emerald-400">Steam\steamapps\common\GameName</code></li>
+                <li>Custom Games: <code className="text-emerald-400">C:\Games\GameName</code></li>
+                <li>Secondary Drive: <code className="text-emerald-400">D:\Games\GameName</code></li>
+              </ul>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                onClick={() => {
+                  setFolderTipOpen(false);
+                  handleImportRealFolder();
+                }}
+                className="px-4 py-2 text-xs font-semibold text-white bg-sky-600 hover:bg-sky-500 rounded-lg transition-colors cursor-pointer"
+              >
+                Dubara Folder Choose Karein
+              </button>
+              <button
+                onClick={() => setFolderTipOpen(false)}
+                className="px-4 py-2 text-xs font-medium text-slate-400 hover:text-white bg-slate-800 rounded-lg transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hidden Folder Picker Input */}
       <input
         type="file"
         ref={folderInputRef}
@@ -519,6 +561,15 @@ export default function App() {
         webkitdirectory=""
         // @ts-ignore
         directory=""
+        multiple
+        className="hidden"
+      />
+
+      {/* Hidden Files Picker Input */}
+      <input
+        type="file"
+        ref={filesInputRef}
+        onChange={handleFileInputChange}
         multiple
         className="hidden"
       />

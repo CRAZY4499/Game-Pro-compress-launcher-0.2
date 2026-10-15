@@ -8,6 +8,7 @@ interface GameListProps {
   onSelectGame: (gameId: string) => void;
   onOptimizeGame: (game: GameFolder) => void;
   onNavigateToDiagnostics: (gameId: string) => void;
+  onRemoveCustomGame?: (gameId: string) => void;
   optimizingGameId: string | null;
   optimizationProgress: number;
 }
@@ -18,6 +19,7 @@ export const GameList: React.FC<GameListProps> = ({
   onSelectGame,
   onOptimizeGame,
   onNavigateToDiagnostics,
+  onRemoveCustomGame,
   optimizingGameId,
   optimizationProgress
 }) => {
@@ -160,6 +162,18 @@ export const GameList: React.FC<GameListProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2">
+                  {game.isCustomLoaded && onRemoveCustomGame && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onRemoveCustomGame(game.id);
+                      }}
+                      className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-rose-950/40 text-slate-400 hover:text-rose-300 font-medium transition-colors cursor-pointer text-xs"
+                      title="Remove from monitored list"
+                    >
+                      Remove
+                    </button>
+                  )}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
